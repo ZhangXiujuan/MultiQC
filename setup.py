@@ -98,6 +98,7 @@ setup(
             'htseq = multiqc.modules.htseq:MultiqcModule',
             'interop = multiqc.modules.interop:MultiqcModule',
             'jellyfish = multiqc.modules.jellyfish:MultiqcModule',
+            'jbrhCNV = multiqc.modules.jbrhCNV:MultiqcModule',
             'kallisto = multiqc.modules.kallisto:MultiqcModule',
             'leehom = multiqc.modules.leehom:MultiqcModule',
             'macs2 = multiqc.modules.macs2:MultiqcModule',

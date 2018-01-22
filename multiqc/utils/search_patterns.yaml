@@ -188,6 +188,13 @@ interop/index-summary:
     contents: 'Total Reads,PF Reads,% Read Identified (PF),CV,Min,Max'
 jellyfish:
     fn: '*_jf.hist'
+jbrhCNV/stat:
+    fn: '*.txt'
+    contents: 'Total_Reads	MT_ratio(%)	Map_Ratio(%)	Duplicate(%)	GC_Count(%)	*SD'
+jbrhCNV/report:
+    fn: '*.report.print.txt'
+jbrhCNV/winplot:
+    fn: '*.gc.cnt.each.txt'
 kallisto:
     contents: '[quant] finding pseudoalignments for the reads'
     shared: true
