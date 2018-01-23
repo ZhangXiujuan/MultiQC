@@ -194,7 +194,7 @@ jbrhCNV/stat:
 jbrhCNV/report:
     fn: '*.report.print.txt'
 jbrhCNV/winplot:
-    fn: '*.gc.cnt.each.txt'
+    fn: '*each.txt'
 kallisto:
     contents: '[quant] finding pseudoalignments for the reads'
     shared: true

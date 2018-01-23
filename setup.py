@@ -130,6 +130,7 @@ setup(
             'verifybamid = multiqc.modules.verifybamid:MultiqcModule'
         ],
         'multiqc.templates.v1': [
+            'jbrh = multiqc.templates.jbrh',
             'default = multiqc.templates.default',
             'default_dev = multiqc.templates.default_dev',
             'sections = multiqc.templates.sections',
