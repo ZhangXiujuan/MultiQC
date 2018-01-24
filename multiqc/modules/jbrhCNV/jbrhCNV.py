@@ -34,8 +34,8 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Find and parse cnv report data
         for f in self.find_log_files('jbrhCNV/report'):
-            sd = self.cnv_data['stat'][f['s_name']]['*SD']
-            parsed_data = self.parse_cnv_report(f['f'],sd)
+            #sd = self.cnv_data['stat'][f['s_name']]['*SD']
+            parsed_data = self.parse_cnv_report(f['f'])
             if parsed_data is not None:
                 if f['s_name'] in self.cnv_data['report']:
                     log.debug("Duplicate report sample log found! Overwriting: {}".format(f['s_name']))
@@ -50,7 +50,12 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Basic Stats table
         self.cnv_stats_table()
-        self.cnv_report_table()
+
+        # Write out to the Report
+        if len(self.cnv_data['report']) > 0:
+            log.info("Found {} jbrhCNV CNV reports".format(len(self.cnv_data['report'])))
+            self.cnv_report_table()
+
 
 
         # Find and parse cnv cnt data and plot one by one
@@ -62,6 +67,9 @@ class MultiqcModule(BaseMultiqcModule):
                 self.add_data_source(f,section='winplot')
                 self.cnv_data['winplot'][f['s_name']] = parsed_data
                 self.cnv_winplot_plot(parsed_data,f['s_name'])
+
+        if len(self.cnv_data['winplot']) > 0:
+            log.info("Found {} jbrhCNV winplot reports".format(len(self.cnv_data['winplot'])))
 
 
     def parse_cnv_stat(self, stat_content):
@@ -76,12 +84,10 @@ class MultiqcModule(BaseMultiqcModule):
 
         return parsed_data
 
-    def parse_cnv_report(self,report_content,sd):
+    def parse_cnv_report(self,report_content):
         """ get report from report.txt"""
         parsed_data = {}
-
         parsed_data['report'] = report_content
-        parsed_data['sd'] = sd
 
         return parsed_data
 
@@ -89,27 +95,39 @@ class MultiqcModule(BaseMultiqcModule):
         """get each chromosome window rcids and plot"""
         data = list()
         n = 0
+        rcid_dic = dict()
+        rcid_dic_sex = dict()
+        color1 = '#0000FF'
+        color2 = '#FF0000'
+        color = ""
         for line in cnt.splitlines():
             tmp = line.split()
-            n += 1
             chro = re.search("chr(\S+)",tmp[0])
-            color1 = '#0000FF'
-            color2 = '#FF0000'
-            color = ""
-            name = tmp[0] + "_" + tmp[1] + "_" + tmp[2]
-            if chro.group(1) == "X":
-                color = color2
-            elif chro.group(1) == "Y":
+            x = re.match(r'[X|Y]',chro.group(1),)
+            if x:
+                rcid_dic_sex[chro.group(1),int(tmp[1]),int(tmp[2])] = tmp[3]
+            else:
+                rcid_dic[int(chro.group(1)),int(tmp[1]),int(tmp[2])] = tmp[3]
+        for c,s in sorted(rcid_dic.items()):
+            n+=1
+            name = 'chr' + str(c[0]) + "_" + str(c[1]) + "_" + str(c[2])
+            if int(c[0]) % 2 == 0:
                 color = color1
             else:
-                if int(chro.group(1)) % 2 == 0:
-                    color = color1
-                else:
-                    color = color2
+                color = color2
             data.append(
-                {'x':n,'y':float(tmp[3]),'color':color,'name':name}
+                {'x':n,'y':float(s),'color':color,'name':name}
             )
-
+        for c,s in sorted(rcid_dic_sex.items()):
+            n+=1
+            name = 'chr' + str(c[0]) + "_" + str(c[1]) + "_" + str(c[2])
+            if c[0] == "X":
+                color = color2
+            if c[0] == "Y":
+                color = color1
+            data.append(
+                {'x':n,'y':float(s),'color':color,'name':name}
+            )
         return data
 
 
@@ -122,7 +140,7 @@ class MultiqcModule(BaseMultiqcModule):
             'marker_size':2,
             'marker_line_width':0
         }
-        data[s_name]=cnt
+        data[s_name] = cnt
         self.add_section(
             name = s_name,
             anchor = 'wp' + s_name,
